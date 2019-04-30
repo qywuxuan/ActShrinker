@@ -57,6 +57,8 @@ namespace ActShrinker
 
         static void Main(string[] args)
         {
+            var startTime = DateTime.Now;
+
             #region Select
             var allFiles = new List<string>(GetAllFiles(inputDir, SearchOption.AllDirectories));
 
@@ -149,7 +151,8 @@ namespace ActShrinker
                 }
 
                 Console.Clear();
-                Console.WriteLine("压缩完毕，等待打包");
+                var ts = (DateTime.Now - startTime);
+                Console.WriteLine(string.Format("压缩完毕，等待打包。压缩耗时：{0}分 {1}秒。", ts.Minutes, ts.Seconds));
             }
             #endregion
 
