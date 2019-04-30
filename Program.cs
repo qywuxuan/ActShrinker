@@ -91,7 +91,7 @@ namespace ActShrinker
                     var width = img.Width;
                     var height = img.Height;
 
-                    var bitmap = new Bitmap(img, GetSmallestPO2(width), GetSmallestPO2(height));
+                    var bitmap = new Bitmap(img, GetNearestPO2(width), GetNearestPO2(height));
 
                     CreateDirectory(GetDirectoryPath(copy));
                     bitmap.Save(copy);
@@ -230,6 +230,28 @@ namespace ActShrinker
 
                 i = next;
             }
+        }
+
+        public static int GetBiggestPO2(int size)
+        {
+            var i = 2;
+            for (; ; )
+            {
+                if (size < i)
+                {
+                    return i;
+                }
+
+                i = i << 1;
+            }
+        }
+
+        public static int GetNearestPO2(int size)
+        {
+            var p1 = GetSmallestPO2(size);
+            var p2 = GetBiggestPO2(size);
+
+            return p2 - size > size - p1 ? p1 : p2;
         }
 
         public static bool ExistsDirectory(string directoryPath)
