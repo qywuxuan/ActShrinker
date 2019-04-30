@@ -57,6 +57,7 @@ namespace ActShrinker
 
         static void Main(string[] args)
         {
+            #region Select
             var allFiles = new List<string>(GetAllFiles(inputDir, SearchOption.AllDirectories));
 
             var imgs = allFiles.FindAll(file =>
@@ -75,69 +76,78 @@ namespace ActShrinker
             });
 
             var targetImgs = imgs.FindAll(img => GetFileSize(img) >= 100);
+            #endregion
 
-            DeleteDirectory(outputDir);
-            CreateDirectory(outputDir);
-
-            for (int i = 0; i < allFiles.Count; i++)
+            #region Copy
             {
-                var file = allFiles[i];
-                var copy = file.Replace(ORIGIN_ROOT_NAME, OUTPUT_ROOT_NAME);
+                DeleteDirectory(outputDir);
+                CreateDirectory(outputDir);
 
-                if (imgs.Contains(file))
+                for (int i = 0; i < allFiles.Count; i++)
                 {
-                    var img = Image.FromFile(file);
+                    var file = allFiles[i];
+                    var copy = file.Replace(ORIGIN_ROOT_NAME, OUTPUT_ROOT_NAME);
 
-                    var width = img.Width;
-                    var height = img.Height;
-
-                    var bitmap = new Bitmap(img, GetNearestPO2(width), GetNearestPO2(height));
-
-                    CreateDirectory(GetDirectoryPath(copy));
-                    bitmap.Save(copy);
-                }
-                else
-                {
-                    CopyFile(file, copy);
-                }
-            }
-
-            Tinify.Key = API_KEY;
-
-            var count = 0;
-
-            for (int i = 0; i < targetImgs.Count; i++)
-            {
-                var index = i;
-
-                new Task(async () =>
-                {
-                    var targetImg = targetImgs[index];
-                    var targetImgCopy = targetImg.Replace(ORIGIN_ROOT_NAME, OUTPUT_ROOT_NAME);
-
-                    var source = Tinify.FromFile(targetImgCopy);
-                    await source.ToFile(targetImgCopy);
-
-                    lock (SyncObject)
+                    if (imgs.Contains(file))
                     {
-                        count++;
+                        var img = Image.FromFile(file);
+
+                        var width = img.Width;
+                        var height = img.Height;
+
+                        var bitmap = new Bitmap(img, GetNearestPO2(width), GetNearestPO2(height));
+
+                        CreateDirectory(GetDirectoryPath(copy));
+                        bitmap.Save(copy);
                     }
-
-                }).Start();
-            }
-
-            while (true)
-            {
-                Console.Clear();
-                Console.WriteLine("压缩中，当前第 {0} 张，共 {1} 张", count + 1, targetImgs.Count);
-                Thread.Sleep(100);
-                if (count == targetImgs.Count)
-                {
-                    break;
+                    else
+                    {
+                        CopyFile(file, copy);
+                    }
                 }
             }
+            #endregion
 
-            Console.Clear();
+            #region RunTinyPng
+            {
+                Tinify.Key = API_KEY;
+
+                var count = 0;
+
+                for (int i = 0; i < targetImgs.Count; i++)
+                {
+                    var index = i;
+
+                    new Task(async () =>
+                    {
+                        var targetImg = targetImgs[index];
+                        var targetImgCopy = targetImg.Replace(ORIGIN_ROOT_NAME, OUTPUT_ROOT_NAME);
+
+                        var source = Tinify.FromFile(targetImgCopy);
+                        await source.ToFile(targetImgCopy);
+
+                        lock (SyncObject)
+                        {
+                            count++;
+                        }
+
+                    }).Start();
+                }
+
+                while (true)
+                {
+                    Console.Clear();
+                    Console.WriteLine("压缩中，当前第 {0} 张，共 {1} 张", count + 1, targetImgs.Count);
+                    Thread.Sleep(100);
+                    if (count == targetImgs.Count)
+                    {
+                        break;
+                    }
+                }
+
+                Console.Clear();
+            }
+            #endregion
 
             RunZipBatch();
         }
