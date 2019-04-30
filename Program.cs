@@ -85,6 +85,9 @@ namespace ActShrinker
 
                 for (int i = 0; i < allFiles.Count; i++)
                 {
+                    Console.Clear();
+                    Console.WriteLine("文件拷贝中，当前第 {0} 份，共 {1} 份", i + 1, allFiles.Count);
+
                     var file = allFiles[i];
                     var copy = file.Replace(ORIGIN_ROOT_NAME, OUTPUT_ROOT_NAME);
 
@@ -126,10 +129,13 @@ namespace ActShrinker
                         var source = Tinify.FromFile(targetImgCopy);
                         await source.ToFile(targetImgCopy);
 
-                        lock (SyncObject)
+                        await new Task(() =>
                         {
-                            count++;
-                        }
+                            lock (SyncObject)
+                            {
+                                count++;
+                            }
+                        });
 
                     }).Start();
                 }
@@ -146,6 +152,7 @@ namespace ActShrinker
                 }
 
                 Console.Clear();
+                Console.WriteLine("压缩完毕，等待打包");
             }
             #endregion
 
