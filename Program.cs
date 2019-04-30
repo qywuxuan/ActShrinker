@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -80,8 +82,24 @@ namespace ActShrinker
             for (int i = 0; i < allFiles.Count; i++)
             {
                 var file = allFiles[i];
+                var copy = file.Replace(ORIGIN_ROOT_NAME, OUTPUT_ROOT_NAME);
 
-                CopyFile(file, file.Replace(ORIGIN_ROOT_NAME, OUTPUT_ROOT_NAME));
+                if (imgs.Contains(file))
+                {
+                    var img = Image.FromFile(file);
+
+                    var width = img.Width;
+                    var height = img.Height;
+
+                    var bitmap = new Bitmap(img, GetSmallestPO2(width), GetSmallestPO2(height));
+
+                    CreateDirectory(GetDirectoryPath(copy));
+                    bitmap.Save(copy);
+                }
+                else
+                {
+                    CopyFile(file, copy);
+                }
             }
 
             Tinify.Key = API_KEY;
@@ -178,6 +196,39 @@ namespace ActShrinker
             else
             {
                 //do nothing
+            }
+        }
+
+        public static bool ExistsFile(string filePath)
+        {
+            return File.Exists(filePath);
+        }
+
+        public static void DeleteFile(string filePath)
+        {
+            if (ExistsFile(filePath))
+            {
+                File.Delete(filePath);
+            }
+            else
+            {
+                //do nothing
+            }
+        }
+
+        public static int GetSmallestPO2(int size)
+        {
+            var i = 1;
+            for (; ; )
+            {
+                var next = i << 1;
+
+                if (size < next)
+                {
+                    return i;
+                }
+
+                i = next;
             }
         }
 
