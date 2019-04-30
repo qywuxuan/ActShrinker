@@ -121,23 +121,20 @@ namespace ActShrinker
                 {
                     var index = i;
 
-                    new Task(async () =>
+                    Task.Factory.StartNew(async () =>
                     {
                         var targetImg = targetImgs[index];
                         var targetImgCopy = targetImg.Replace(ORIGIN_ROOT_NAME, OUTPUT_ROOT_NAME);
 
                         var source = Tinify.FromFile(targetImgCopy);
-                        await source.ToFile(targetImgCopy);
-
-                        await new Task(() =>
+                        await source.ToFile(targetImgCopy).ContinueWith(_ =>
                         {
                             lock (SyncObject)
                             {
                                 count++;
                             }
                         });
-
-                    }).Start();
+                    }, TaskCreationOptions.PreferFairness);
                 }
 
                 while (true)
