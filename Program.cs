@@ -57,12 +57,55 @@ namespace ActShrinker
 
         static void Main(string[] args)
         {
+            #region 输入处理
+            Console.WriteLine("使用说明：\n输入-a后回车，遍历所有活动文件。\n输入-t + 指定文件夹后回车，遍历指定活动文件夹，例如：-t version/v3|version/v4\n");
+            var rawPara = Console.ReadLine();
+
+            List<string> targetFiles = null;
+            var selectedDirectories = new List<string>();
+
+            var paras = rawPara.Split(' ');
+            if (paras[0].Equals("-a"))
+            {
+                targetFiles = new List<string>(GetAllFiles(inputDir, SearchOption.AllDirectories));
+                selectedDirectories.Add(outputDir);
+            }
+            else if (paras[0].Equals("-t"))
+            {
+                if (paras.Length < 2)
+                {
+                    //input wrong
+                }
+                else
+                {
+                    var targetPaths = paras[1].Split('|');
+                    targetFiles = new List<string>();
+                    for (int i = 0; i < targetPaths.Length; i++)
+                    {
+                        var targetPath = targetPaths[i];
+                        targetFiles.AddRange(new List<string>(GetAllFiles(Path.Combine(inputDir, targetPath), SearchOption.AllDirectories)));
+                        selectedDirectories.Add(Path.Combine(outputDir, targetPath));
+                    }
+                }
+            }
+
+            if (targetFiles != null)
+            {
+                //do nothing
+            }
+            else
+            {
+                Console.WriteLine("参数异常，按任意键退出");
+                Console.ReadKey();
+                return;
+            }
+            #endregion
+
             var startTime = DateTime.Now;
 
             #region Select
-            var allFiles = new List<string>(GetAllFiles(inputDir, SearchOption.AllDirectories));
 
-            var imgs = allFiles.FindAll(file =>
+            var imgs = targetFiles.FindAll(file =>
             {
                 var extension = new string[] { "png", "jpg" };
 
@@ -82,15 +125,24 @@ namespace ActShrinker
 
             #region Copy
             {
-                DeleteDirectory(outputDir);
-                CreateDirectory(outputDir);
+                for (int i = 0; i < selectedDirectories.Count; i++)
+                {
+                    var selectedDirectory = selectedDirectories[i];
+                    DeleteDirectory(selectedDirectory);
+                }
 
-                for (int i = 0; i < allFiles.Count; i++)
+                for (int i = 0; i < selectedDirectories.Count; i++)
+                {
+                    var selectedDirectory = selectedDirectories[i];
+                    CreateDirectory(selectedDirectory);
+                }
+
+                for (int i = 0; i < targetFiles.Count; i++)
                 {
                     Console.Clear();
-                    Console.WriteLine("文件拷贝中，当前第 {0} 份，共 {1} 份", i + 1, allFiles.Count);
+                    Console.WriteLine("文件拷贝中，当前第 {0} 份，共 {1} 份", i + 1, targetFiles.Count);
 
-                    var file = allFiles[i];
+                    var file = targetFiles[i];
                     var copy = file.Replace(ORIGIN_ROOT_NAME, OUTPUT_ROOT_NAME);
 
                     if (imgs.Contains(file))
