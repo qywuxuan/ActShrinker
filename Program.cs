@@ -58,34 +58,26 @@ namespace ActShrinker
         static void Main(string[] args)
         {
             #region 输入处理
-            Console.WriteLine("使用说明：\n输入-a后回车，遍历所有活动文件。\n输入-t + 指定文件夹后回车，遍历指定活动文件夹，例如：-t version/v3|version/v4\n");
-            var rawPara = Console.ReadLine();
+            var para = args[0];
 
             List<string> targetFiles = null;
             var selectedDirectories = new List<string>();
 
-            var paras = rawPara.Split(' ');
-            if (paras[0].Equals("-a"))
+            if (para.Equals("-a"))
             {
                 targetFiles = new List<string>(GetAllFiles(inputDir, SearchOption.AllDirectories));
                 selectedDirectories.Add(outputDir);
             }
-            else if (paras[0].Equals("-t"))
+            else
             {
-                if (paras.Length < 2)
+                var targetPaths = para.Split('@');
+
+                targetFiles = new List<string>();
+                for (int i = 0; i < targetPaths.Length; i++)
                 {
-                    //input wrong
-                }
-                else
-                {
-                    var targetPaths = paras[1].Split('|');
-                    targetFiles = new List<string>();
-                    for (int i = 0; i < targetPaths.Length; i++)
-                    {
-                        var targetPath = targetPaths[i];
-                        targetFiles.AddRange(new List<string>(GetAllFiles(Path.Combine(inputDir, targetPath), SearchOption.AllDirectories)));
-                        selectedDirectories.Add(Path.Combine(outputDir, targetPath));
-                    }
+                    var targetPath = targetPaths[i];
+                    targetFiles.AddRange(new List<string>(GetAllFiles(Path.Combine(inputDir, targetPath), SearchOption.AllDirectories)));
+                    selectedDirectories.Add(Path.Combine(outputDir, targetPath));
                 }
             }
 
@@ -95,9 +87,7 @@ namespace ActShrinker
             }
             else
             {
-                Console.WriteLine("参数异常，按任意键退出");
-                Console.ReadKey();
-                return;
+                return;//参数异常
             }
             #endregion
 
@@ -139,10 +129,7 @@ namespace ActShrinker
 
                 for (int i = 0; i < targetFiles.Count; i++)
                 {
-                    Console.Clear();
-                    Console.WriteLine("文件拷贝中，当前第 {0} 份，共 {1} 份", i + 1, targetFiles.Count);
-
-                    var file = targetFiles[i];
+                    var file = targetFiles[i];//Console.WriteLine("文件拷贝中，当前第 {0} 份，共 {1} 份", i + 1, targetFiles.Count);
                     var copy = file.Replace(ORIGIN_ROOT_NAME, OUTPUT_ROOT_NAME);
 
                     if (imgs.Contains(file))
@@ -193,41 +180,16 @@ namespace ActShrinker
 
                 while (true)
                 {
-                    Console.Clear();
-                    Console.WriteLine("压缩中，当前第 {0} 张，共 {1} 张", count + 1, targetImgs.Count);
-                    Thread.Sleep(100);
+                    Thread.Sleep(100);//Console.WriteLine("压缩中，当前第 {0} 张，共 {1} 张", count + 1, targetImgs.Count);
                     if (count == targetImgs.Count)
                     {
                         break;
                     }
                 }
 
-                Console.Clear();
                 var ts = (DateTime.Now - startTime);
-                Console.WriteLine(string.Format("压缩完毕，等待打包。压缩耗时：{0}分 {1}秒。", ts.Minutes, ts.Seconds));
             }
             #endregion
-
-            RunZipBatch();
-        }
-
-        static void RunZipBatch()
-        {
-            Process proc = null;
-            try
-            {
-                proc = new Process();
-                proc.StartInfo.WorkingDirectory = curDir;
-                proc.StartInfo.FileName = "win_build.bat";
-                //proc.StartInfo.Arguments = string.Format("10");
-                proc.StartInfo.CreateNoWindow = false;
-                proc.Start();
-                proc.WaitForExit();
-            }
-            catch (System.Exception ex)
-            {
-                Console.WriteLine("Exception Occurred :{0},{1}", ex.Message, ex.StackTrace.ToString());
-            }
         }
 
         #region IO
