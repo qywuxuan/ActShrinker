@@ -89,6 +89,8 @@ namespace ActShrinker
             {
                 return;//参数异常
             }
+
+            targetFiles.RemoveAll(file => file.Contains("\\.svn\\"));
             #endregion
 
             var startTime = DateTime.Now;
