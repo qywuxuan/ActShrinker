@@ -15,7 +15,12 @@ namespace ActShrinker
 {
     class Program
     {
-        const string API_KEY = "lEXWM4Wfavvw0B6DKBJb3MNFi9xH6B1l";
+        static readonly string[] API_KEYs = new string[]
+        {
+            "lEXWM4Wfavvw0B6DKBJb3MNFi9xH6B1l",//105264061
+            "VSWQQ500y8C8FrRnM7rxfY7rszBqM0xd",//455212036
+        };
+
         const string ORIGIN_ROOT_NAME = "活动动态资源";
         const string OUTPUT_ROOT_NAME = "ActShrinker/ActRes";
 
@@ -91,6 +96,18 @@ namespace ActShrinker
             }
 
             targetFiles.RemoveAll(file => file.Contains("\\.svn\\"));
+
+            if (args.Length > 1)
+            {
+                var keyIndex = int.Parse(args[1]);
+                Tinify.Key = API_KEYs[keyIndex];
+            }
+            else
+            {
+                Tinify.Key = API_KEYs[0];
+            }
+
+            Console.WriteLine(string.Format("资源编译开始，Tinify.Key:{0}", Tinify.Key));
             #endregion
 
             var startTime = DateTime.Now;
@@ -152,13 +169,15 @@ namespace ActShrinker
                     }
                 }
             }
+
+            Console.WriteLine(string.Format("文件拷贝完毕，共{0}份文件", targetFiles.Count));
             #endregion
 
             #region RunTinyPng
             {
-                Tinify.Key = API_KEY;
-
                 var count = 0;
+
+                Console.WriteLine(string.Format("图片压缩开始，共{0}张图片", targetImgs.Count));
 
                 for (int i = 0; i < targetImgs.Count; i++)
                 {
