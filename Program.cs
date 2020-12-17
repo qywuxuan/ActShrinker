@@ -18,7 +18,7 @@ namespace ActShrinker
         };
 
         const string ORIGIN_ROOT_NAME = "活动动态资源";
-        const string OUTPUT_ROOT_NAME = "ActShrinker/ActRes";
+        const string OUTPUT_ROOT_NAME = "ActShrinker\\ActRes";
 
         static readonly object SyncObject = new object();
 
