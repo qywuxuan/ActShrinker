@@ -62,6 +62,9 @@ namespace ActShrinker
 
         static void Main(string[] args)
         {
+            if (args.Length == 0)
+                return;
+
             #region 输入处理
             var para = args[0];
 
