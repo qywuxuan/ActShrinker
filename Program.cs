@@ -135,6 +135,8 @@ namespace ActShrinker
 
             #region Copy
             {
+                Console.WriteLine(string.Format("文件拷贝开始，共 {0} 份文件", targetFiles.Count));
+
                 for (int i = 0; i < selectedDirectories.Count; i++)
                 {
                     var selectedDirectory = selectedDirectories[i];
@@ -171,7 +173,7 @@ namespace ActShrinker
                 }
             }
 
-            Console.WriteLine(string.Format("文件拷贝完毕，共 {0} 份文件", targetFiles.Count));
+            Console.WriteLine("文件拷贝完毕");
             #endregion
 
             #region RunTinyPng
