@@ -69,6 +69,8 @@ namespace ActShrinker
 
             if (para.Equals("-a"))
             {
+                Console.WriteLine(string.Format("编译参数：{0}", "全编译"));
+
                 targetFiles = new List<string>(GetAllFiles(inputDir, SearchOption.AllDirectories));
                 selectedDirectories.Add(outputDir);
             }
@@ -169,6 +171,8 @@ namespace ActShrinker
                     else
                     {
                         CopyFile(file, copy);
+
+                        Console.WriteLine("已完成第 {0} 份，Path:{1}", i + 1, file);
                     }
                 }
             }
