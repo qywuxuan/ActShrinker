@@ -222,6 +222,9 @@ namespace ActShrinker
         #region IO
         public static string[] GetAllFiles(string path, SearchOption searchOption = SearchOption.AllDirectories, string fileNameRegex = null)
         {
+            if (!ExistsDirectory(path))
+                return new string[0];
+
             var allFiles = new List<string>(Directory.GetFiles(path, "*.*", searchOption));
 
             if (fileNameRegex == null)
