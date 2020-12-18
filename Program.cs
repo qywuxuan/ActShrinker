@@ -109,8 +109,6 @@ namespace ActShrinker
             Console.WriteLine(string.Format("资源编译开始，Tinify.Key:{0}", Tinify.Key));
             #endregion
 
-            var startTime = DateTime.Now;
-
             #region Select
 
             var imgs = targetFiles.FindAll(file =>
@@ -169,48 +167,53 @@ namespace ActShrinker
                 }
             }
 
-            Console.WriteLine(string.Format("文件拷贝完毕，共{0}份文件", targetFiles.Count));
+            Console.WriteLine(string.Format("文件拷贝完毕，共 {0} 份文件", targetFiles.Count));
             #endregion
 
             #region RunTinyPng
             {
-                var count = 0;
-
-                Console.WriteLine(string.Format("图片压缩开始，共{0}张图片", targetImgs.Count));
+                Console.WriteLine(string.Format("图片压缩开始，共 {0} 张图片", targetImgs.Count));
 
                 for (int i = 0; i < targetImgs.Count; i++)
                 {
                     var index = i;
 
-                    Task.Factory.StartNew(async () =>
-                    {
-                        var targetImg = targetImgs[index];
-                        var targetImgCopy = targetImg.Replace(ORIGIN_ROOT_NAME, OUTPUT_ROOT_NAME);
+                    var targetImg = targetImgs[index];
+                    var targetImgCopy = targetImg.Replace(ORIGIN_ROOT_NAME, OUTPUT_ROOT_NAME);
 
-                        var source = Tinify.FromFile(targetImgCopy);
-                        await source.ToFile(targetImgCopy).ContinueWith(_ =>
-                        {
-                            lock (SyncObject)
-                            {
-                                count++;
-                            }
-                        });
-                    }, TaskCreationOptions.PreferFairness);
+                    tinyImg(targetImgCopy);
                 }
 
                 while (true)
                 {
-                    Thread.Sleep(100);//Console.WriteLine("压缩中，当前第 {0} 张，共 {1} 张", count + 1, targetImgs.Count);
+                    Thread.Sleep(1000);
                     if (count == targetImgs.Count)
                     {
                         break;
                     }
                 }
 
-                var ts = (DateTime.Now - startTime);
+                Console.WriteLine("图片压缩完毕");
             }
             #endregion
         }
+
+        #region Tinify
+        static int count;
+
+        async static void tinyImg(string path)
+        {
+            var source = Tinify.FromFile(path);
+            await source.ToFile(path);
+
+            lock (SyncObject)
+            {
+                count++;
+            }
+
+            Console.WriteLine("已完成第 {0} 张，Path:{1}", count, path);
+        }
+        #endregion
 
         #region IO
         public static string[] GetAllFiles(string path, SearchOption searchOption = SearchOption.AllDirectories, string fileNameRegex = null)
