@@ -149,7 +149,7 @@ namespace ActShrinker
 
                 for (int i = 0; i < targetFiles.Count; i++)
                 {
-                    var file = targetFiles[i];//Console.WriteLine("文件拷贝中，当前第 {0} 份，共 {1} 份", i + 1, targetFiles.Count);
+                    var file = targetFiles[i];
                     var copy = file.Replace(ORIGIN_ROOT_NAME, OUTPUT_ROOT_NAME);
 
                     if (imgs.Contains(file))
