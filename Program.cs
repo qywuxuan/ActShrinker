@@ -74,6 +74,10 @@ namespace ActShrinker
             }
             else
             {
+                para = string.Format(@"lobby\login\{0}@newActivityRoot\{0}", para);
+
+                Console.WriteLine(string.Format("编译参数：{0}", para));
+
                 var targetPaths = para.Split('@');
 
                 targetFiles = new List<string>();
