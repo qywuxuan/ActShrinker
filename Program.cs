@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -19,6 +20,7 @@ namespace ActShrinker
 
         const string ORIGIN_ROOT_NAME = "活动动态资源";
         const string OUTPUT_ROOT_NAME = "ActShrinker\\ActRes";
+        const string TOOL_7ZA_ROOT_NAME = "ActShrinker\\tools\\7z_win\\7za.exe";
 
         static readonly object SyncObject = new object();
 
@@ -52,6 +54,14 @@ namespace ActShrinker
             get
             {
                 return Path.Combine(rootDir, OUTPUT_ROOT_NAME);
+            }
+        }
+
+        static string tool7zaPath
+        {
+            get
+            {
+                return Path.Combine(rootDir, TOOL_7ZA_ROOT_NAME);
             }
         }
         #endregion
@@ -212,6 +222,10 @@ namespace ActShrinker
                 Console.WriteLine("图片压缩完毕，失败：{0} 张", count - sucCount);
             }
             #endregion
+
+            #region Archive
+            Archive();
+            #endregion
         }
 
         #region Tinify
@@ -367,6 +381,38 @@ namespace ActShrinker
         {
             var fileInfo = new FileInfo(path);
             return (int)Math.Ceiling(fileInfo.Length / 1024.0); //kb
+        }
+        #endregion
+
+        #region 7za
+        const string PREFIX = "ActRes_";
+
+        static void Archive()
+        {
+            Clear();
+
+            Zip();
+        }
+
+        static void Clear()
+        {
+            var oldArchives = new List<string>(GetAllFiles(curDir, SearchOption.TopDirectoryOnly, @".+\.zip"));
+
+            foreach (var oldArchive in oldArchives)
+            {
+                DeleteFile(oldArchive);
+            }
+        }
+
+        static void Zip()
+        {
+            var archive = PREFIX + DateTime.Now.ToString("yyyyMMdd_HHmm");
+
+            var process = new Process();
+            process.StartInfo.FileName = tool7zaPath;
+            process.StartInfo.Arguments = string.Format("a {0}.zip ActRes/*", archive);
+            process.Start();
+            process.WaitForExit();
         }
         #endregion
     }
