@@ -21,6 +21,7 @@ namespace ActShrinker
         const string ORIGIN_ROOT_NAME = "活动动态资源";
         const string OUTPUT_ROOT_NAME = "ActShrinker\\ActRes";
         const string TOOL_7ZA_ROOT_NAME = "ActShrinker\\tools\\7z_win\\7za.exe";
+        const int limit = 100;//筛选大于100kb的图片进行压缩。更优化一步，这里的筛选应该放在对图片进行PO2处理后，因为PO2处理会使图片变大。
 
         static readonly object SyncObject = new object();
 
@@ -142,7 +143,7 @@ namespace ActShrinker
                 return false;
             });
 
-            var targetImgs = imgs.FindAll(img => GetFileSize(img) >= 100);
+            var targetImgs = imgs.FindAll(img => GetFileSize(img) >= limit);
             #endregion
 
             #region Copy
@@ -198,7 +199,7 @@ namespace ActShrinker
 
             #region RunTinyPng
             {
-                Console.WriteLine(string.Format("图片压缩开始，共 {0} 张图片", targetImgs.Count));
+                Console.WriteLine(string.Format("图片压缩开始，共 {0} 张图片（小于 {1} kb 的图片不做压缩处理）", targetImgs.Count, limit));
 
                 for (int i = 0; i < targetImgs.Count; i++)
                 {
