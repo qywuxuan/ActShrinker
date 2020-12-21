@@ -156,6 +156,8 @@ namespace ActShrinker
                     var file = targetFiles[i];
                     var copy = file.Replace(ORIGIN_ROOT_NAME, OUTPUT_ROOT_NAME);
 
+                    var msg = "";
+
                     if (imgs.Contains(file))
                     {
                         var img = Image.FromFile(file);
@@ -167,13 +169,17 @@ namespace ActShrinker
 
                         CreateDirectory(GetDirectoryPath(copy));
                         bitmap.Save(copy);
+
+                        msg = string.Format("已完成并调整第 {0} 份，Path:{1}", i + 1, file);
                     }
                     else
                     {
                         CopyFile(file, copy);
 
-                        Console.WriteLine("已完成第 {0} 份，Path:{1}", i + 1, file);
+                        msg = string.Format("已完成第 {0} 份，Path:{1}", i + 1, file);
                     }
+
+                    Console.WriteLine(msg);
                 }
             }
 
