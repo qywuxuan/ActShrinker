@@ -209,22 +209,38 @@ namespace ActShrinker
                     }
                 }
 
-                Console.WriteLine("图片压缩完毕");
+                Console.WriteLine("图片压缩完毕，失败：{0} 张", count - sucCount);
             }
             #endregion
         }
 
         #region Tinify
         static int count;
+        static int sucCount;
 
         async static void tinyImg(string path)
         {
             var source = Tinify.FromFile(path);
-            await source.ToFile(path);
+            var suc = true;
+
+            try
+            {
+                await source.ToFile(path);
+            }
+            catch (TinifyAPI.Exception exception)
+            {
+                Console.WriteLine("第 {0} 张 异常，Path:{1}, Exception:{2}", count, path, exception);
+                suc = false;
+            }
 
             lock (SyncObject)
             {
                 count++;
+
+                if (suc)
+                {
+                    sucCount++;
+                }
             }
 
             Console.WriteLine("已完成第 {0} 张，Path:{1}", count, path);
