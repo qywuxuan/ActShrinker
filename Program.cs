@@ -86,7 +86,7 @@ namespace ActShrinker
             }
             else
             {
-                para = string.Format(@"lobby\login\{0}@newActivityRoot\{0}", para);
+                para = string.Format(@"lobby\weaponstorage@lobby\login\{0}@newActivityRoot\{0}", para);
 
                 Console.WriteLine(string.Format("编译参数：{0}", para));
 
