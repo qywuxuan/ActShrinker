@@ -31,7 +31,7 @@ namespace ActShrinker
         {
             get
             {
-                return GetDirectoryPath(curDir);
+                return IOHelper.GetDirectoryPath(curDir);
             }
         }
 
@@ -83,7 +83,7 @@ namespace ActShrinker
             {
                 Console.WriteLine(string.Format("编译参数：{0}", "全编译"));
 
-                targetFiles = new List<string>(GetAllFiles(inputDir, SearchOption.AllDirectories));
+                targetFiles = new List<string>(IOHelper.GetAllFiles(inputDir, SearchOption.AllDirectories));
                 selectedDirectories.Add(outputDir);
             }
             else
@@ -98,7 +98,7 @@ namespace ActShrinker
                 for (int i = 0; i < targetPaths.Length; i++)
                 {
                     var targetPath = targetPaths[i];
-                    targetFiles.AddRange(new List<string>(GetAllFiles(Path.Combine(inputDir, targetPath), SearchOption.AllDirectories)));
+                    targetFiles.AddRange(new List<string>(IOHelper.GetAllFiles(Path.Combine(inputDir, targetPath), SearchOption.AllDirectories)));
                     selectedDirectories.Add(Path.Combine(outputDir, targetPath));
                 }
             }
@@ -144,7 +144,7 @@ namespace ActShrinker
                 return false;
             });
 
-            var targetImgs = imgs.FindAll(img => GetFileSize(img) >= limit);
+            var targetImgs = imgs.FindAll(img => IOHelper.GetFileSize(img) >= limit);
             #endregion
 
             #region Copy
@@ -154,13 +154,13 @@ namespace ActShrinker
                 for (int i = 0; i < selectedDirectories.Count; i++)
                 {
                     var selectedDirectory = selectedDirectories[i];
-                    DeleteDirectory(selectedDirectory);
+                    IOHelper.DeleteDirectory(selectedDirectory);
                 }
 
                 for (int i = 0; i < selectedDirectories.Count; i++)
                 {
                     var selectedDirectory = selectedDirectories[i];
-                    CreateDirectory(selectedDirectory);
+                    IOHelper.CreateDirectory(selectedDirectory);
                 }
 
                 for (int i = 0; i < targetFiles.Count; i++)
@@ -177,16 +177,16 @@ namespace ActShrinker
                         var width = img.Width;
                         var height = img.Height;
 
-                        var bitmap = new Bitmap(img, GetNearestPO2(width), GetNearestPO2(height));
+                        var bitmap = new Bitmap(img, IOHelper.GetNearestPO2(width), IOHelper.GetNearestPO2(height));
 
-                        CreateDirectory(GetDirectoryPath(copy));
+                        IOHelper.CreateDirectory(IOHelper.GetDirectoryPath(copy));
                         bitmap.Save(copy);
 
                         msg = string.Format("已完成并调整第 {0} 份，Path:{1}", i + 1, file);
                     }
                     else
                     {
-                        CopyFile(file, copy);
+                        IOHelper.CopyFile(file, copy);
 
                         msg = string.Format("已完成第 {0} 份，Path:{1}", i + 1, file);
                     }
@@ -263,129 +263,6 @@ namespace ActShrinker
         }
         #endregion
 
-        #region IO
-        public static string[] GetAllFiles(string path, SearchOption searchOption = SearchOption.AllDirectories, string fileNameRegex = null)
-        {
-            if (!ExistsDirectory(path))
-                return new string[0];
-
-            var allFiles = new List<string>(Directory.GetFiles(path, "*.*", searchOption));
-
-            if (fileNameRegex == null)
-            {
-                //do nothing
-            }
-            else
-            {
-                allFiles = allFiles.FindAll(filePath =>
-                {
-                    var fileName = Path.GetFileName(filePath);
-                    return Regex.IsMatch(fileName, fileNameRegex);
-                });
-            }
-
-            return allFiles.ToArray();
-        }
-
-        public static DirectoryInfo CreateDirectory(string directoryPath)
-        {
-            return Directory.CreateDirectory(directoryPath);
-        }
-
-        public static void DeleteDirectory(string directoryPath, bool recursive = true)
-        {
-            if (ExistsDirectory(directoryPath))
-            {
-                Directory.Delete(directoryPath, recursive);
-            }
-            else
-            {
-                //do nothing
-            }
-        }
-
-        public static bool ExistsFile(string filePath)
-        {
-            return File.Exists(filePath);
-        }
-
-        public static void DeleteFile(string filePath)
-        {
-            if (ExistsFile(filePath))
-            {
-                File.Delete(filePath);
-            }
-            else
-            {
-                //do nothing
-            }
-        }
-
-        public static int GetSmallestPO2(int size)
-        {
-            var i = 1;
-            for (; ; )
-            {
-                var next = i << 1;
-
-                if (size < next)
-                {
-                    return i;
-                }
-
-                i = next;
-            }
-        }
-
-        public static int GetBiggestPO2(int size)
-        {
-            var i = 2;
-            for (; ; )
-            {
-                if (size < i)
-                {
-                    return i;
-                }
-
-                i = i << 1;
-            }
-        }
-
-        public static int GetNearestPO2(int size)
-        {
-            var p1 = GetSmallestPO2(size);
-            var p2 = GetBiggestPO2(size);
-
-            return p2 - size > size - p1 ? p1 : p2;
-        }
-
-        public static bool ExistsDirectory(string directoryPath)
-        {
-            return Directory.Exists(directoryPath);
-        }
-
-        public static string GetDirectoryPath(string filePath)
-        {
-            return Path.GetDirectoryName(filePath);
-        }
-
-        public static void CopyFile(string souceFilePath, string destFilePath, bool overwrite = true)
-        {
-            var destDirectoryPath = GetDirectoryPath(destFilePath);
-
-            if (!ExistsDirectory(destDirectoryPath))
-                CreateDirectory(destDirectoryPath);
-
-            File.Copy(souceFilePath, destFilePath, overwrite);
-        }
-
-        public static int GetFileSize(string path)
-        {
-            var fileInfo = new FileInfo(path);
-            return (int)Math.Ceiling(fileInfo.Length / 1024.0); //kb
-        }
-        #endregion
-
         #region 7za
         const string PREFIX = "ActRes_";
 
@@ -398,11 +275,11 @@ namespace ActShrinker
 
         static void Clear()
         {
-            var oldArchives = new List<string>(GetAllFiles(curDir, SearchOption.TopDirectoryOnly, @".+\.zip"));
+            var oldArchives = new List<string>(IOHelper.GetAllFiles(curDir, SearchOption.TopDirectoryOnly, @".+\.zip"));
 
             foreach (var oldArchive in oldArchives)
             {
-                DeleteFile(oldArchive);
+                IOHelper.DeleteFile(oldArchive);
             }
         }
 
