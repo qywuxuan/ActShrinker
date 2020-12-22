@@ -77,10 +77,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="7zaHelper.cs" />
+    <Compile Include="Config.cs" />
     <Compile Include="DirHelper.cs" />
     <Compile Include="IOHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TinifyHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -3,22 +3,12 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Threading;
-using TinifyAPI;
 
 namespace ActShrinker
 {
     class Program
     {
-        static readonly string[] API_KEYs = new string[]
-        {
-            "lEXWM4Wfavvw0B6DKBJb3MNFi9xH6B1l",//105264061
-            "VSWQQ500y8C8FrRnM7rxfY7rszBqM0xd",//455212036
-        };
-
         const string DIR_LOBBY_LOGIN = @"\lobby\login";
-        const int limit = 100;//筛选大于100kb的图片进行压缩。更优化一步，这里的筛选应该放在对图片进行PO2处理后，因为PO2处理会使图片变大。
-
-        static readonly object SyncObject = new object();
 
         static void Main(string[] args)
         {
@@ -69,14 +59,14 @@ namespace ActShrinker
             if (args.Length > 1)
             {
                 var keyIndex = int.Parse(args[1]);
-                Tinify.Key = API_KEYs[keyIndex];
+                TinifyHelper.SetKey(keyIndex);
             }
             else
             {
-                Tinify.Key = API_KEYs[0];
+                TinifyHelper.SetKey(0);
             }
 
-            Console.WriteLine(string.Format("资源编译开始，Tinify.Key:{0}", Tinify.Key));
+            Console.WriteLine(string.Format("资源编译开始，Tinify.Key:{0}", TinifyHelper.GetKey()));
             #endregion
 
             #region Select
@@ -96,7 +86,7 @@ namespace ActShrinker
                 return false;
             });
 
-            var targetImgs = imgs.FindAll(img => IOHelper.GetFileSize(img) >= limit);
+            var targetImgs = imgs.FindAll(img => IOHelper.GetFileSize(img) >= Config.FILE_SIZE_LIMIT);
             #endregion
 
             #region Copy
@@ -152,28 +142,8 @@ namespace ActShrinker
 
             #region RunTinyPng
             {
-                Console.WriteLine(string.Format("图片压缩开始，共 {0} 张图片（小于 {1} kb 的图片不做压缩处理）", targetImgs.Count, limit));
-
-                for (int i = 0; i < targetImgs.Count; i++)
-                {
-                    var index = i;
-
-                    var targetImg = targetImgs[index];
-                    var targetImgCopy = targetImg.Replace(DirHelper.ORIGIN_ROOT_NAME, DirHelper.OUTPUT_ROOT_NAME);
-
-                    tinyImg(targetImgCopy);
-                }
-
-                while (true)
-                {
-                    Thread.Sleep(1000);
-                    if (count == targetImgs.Count)
-                    {
-                        break;
-                    }
-                }
-
-                Console.WriteLine("图片压缩完毕，失败：{0} 张", count - sucCount);
+                var TinifyHelper = new TinifyHelper(targetImgs);
+                TinifyHelper.Run();
             }
             #endregion
 
@@ -181,38 +151,5 @@ namespace ActShrinker
             _7zaHelper.Archive();
             #endregion
         }
-
-        #region Tinify
-        static int count;
-        static int sucCount;
-
-        async static void tinyImg(string path)
-        {
-            var source = Tinify.FromFile(path);
-            var suc = true;
-
-            try
-            {
-                await source.ToFile(path);
-            }
-            catch (TinifyAPI.Exception exception)
-            {
-                Console.WriteLine("第 {0} 张 异常，Path:{1}, Exception:{2}", count, path, exception);
-                suc = false;
-            }
-
-            lock (SyncObject)
-            {
-                count++;
-
-                if (suc)
-                {
-                    sucCount++;
-                }
-            }
-
-            Console.WriteLine("已完成第 {0} 张，Path:{1}", count, path);
-        }
-        #endregion
     }
 }
