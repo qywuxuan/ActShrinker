@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Threading;
@@ -16,55 +15,10 @@ namespace ActShrinker
             "VSWQQ500y8C8FrRnM7rxfY7rszBqM0xd",//455212036
         };
 
-        const string ORIGIN_ROOT_NAME = "活动动态资源";
-        const string OUTPUT_ROOT_NAME = @"ActShrinker\ActRes";
-        const string TOOL_7ZA_ROOT_NAME = @"ActShrinker\tools\7z_win\7za.exe";
         const string DIR_LOBBY_LOGIN = @"\lobby\login";
         const int limit = 100;//筛选大于100kb的图片进行压缩。更优化一步，这里的筛选应该放在对图片进行PO2处理后，因为PO2处理会使图片变大。
 
         static readonly object SyncObject = new object();
-
-        #region Dir
-        static string rootDir
-        {
-            get
-            {
-                return IOHelper.GetDirectoryPath(curDir);
-            }
-        }
-
-        static string curDir
-        {
-            get
-            {
-                return Environment.CurrentDirectory;
-            }
-        }
-
-        static string inputDir
-        {
-            get
-            {
-                return Path.Combine(rootDir, ORIGIN_ROOT_NAME);
-            }
-        }
-
-        static string outputDir
-        {
-            get
-            {
-                return Path.Combine(rootDir, OUTPUT_ROOT_NAME);
-            }
-        }
-
-        static string tool7zaPath
-        {
-            get
-            {
-                return Path.Combine(rootDir, TOOL_7ZA_ROOT_NAME);
-            }
-        }
-        #endregion
 
         static void Main(string[] args)
         {
@@ -81,8 +35,8 @@ namespace ActShrinker
             {
                 Console.WriteLine(string.Format("编译参数：{0}", "全编译"));
 
-                targetFiles = new List<string>(IOHelper.GetAllFiles(inputDir, SearchOption.AllDirectories));
-                selectedDirectories.Add(outputDir);
+                targetFiles = new List<string>(IOHelper.GetAllFiles(DirHelper.inputDir, SearchOption.AllDirectories));
+                selectedDirectories.Add(DirHelper.outputDir);
             }
             else
             {
@@ -96,8 +50,8 @@ namespace ActShrinker
                 for (int i = 0; i < targetPaths.Length; i++)
                 {
                     var targetPath = targetPaths[i];
-                    targetFiles.AddRange(new List<string>(IOHelper.GetAllFiles(Path.Combine(inputDir, targetPath), SearchOption.AllDirectories)));
-                    selectedDirectories.Add(Path.Combine(outputDir, targetPath));
+                    targetFiles.AddRange(new List<string>(IOHelper.GetAllFiles(Path.Combine(DirHelper.inputDir, targetPath), SearchOption.AllDirectories)));
+                    selectedDirectories.Add(Path.Combine(DirHelper.outputDir, targetPath));
                 }
             }
 
@@ -164,7 +118,7 @@ namespace ActShrinker
                 for (int i = 0; i < targetFiles.Count; i++)
                 {
                     var file = targetFiles[i];
-                    var copy = file.Replace(ORIGIN_ROOT_NAME, OUTPUT_ROOT_NAME);
+                    var copy = file.Replace(DirHelper.ORIGIN_ROOT_NAME, DirHelper.OUTPUT_ROOT_NAME);
 
                     var msg = "";
 
@@ -205,7 +159,7 @@ namespace ActShrinker
                     var index = i;
 
                     var targetImg = targetImgs[index];
-                    var targetImgCopy = targetImg.Replace(ORIGIN_ROOT_NAME, OUTPUT_ROOT_NAME);
+                    var targetImgCopy = targetImg.Replace(DirHelper.ORIGIN_ROOT_NAME, DirHelper.OUTPUT_ROOT_NAME);
 
                     tinyImg(targetImgCopy);
                 }
@@ -224,7 +178,7 @@ namespace ActShrinker
             #endregion
 
             #region Archive
-            Archive();
+            _7zaHelper.Archive();
             #endregion
         }
 
@@ -258,38 +212,6 @@ namespace ActShrinker
             }
 
             Console.WriteLine("已完成第 {0} 张，Path:{1}", count, path);
-        }
-        #endregion
-
-        #region 7za
-        const string PREFIX = "ActRes_";
-
-        static void Archive()
-        {
-            Clear();
-
-            Zip();
-        }
-
-        static void Clear()
-        {
-            var oldArchives = new List<string>(IOHelper.GetAllFiles(curDir, SearchOption.TopDirectoryOnly, @".+\.zip"));
-
-            foreach (var oldArchive in oldArchives)
-            {
-                IOHelper.DeleteFile(oldArchive);
-            }
-        }
-
-        static void Zip()
-        {
-            var archive = PREFIX + DateTime.Now.ToString("yyyyMMdd_HHmm");
-
-            var process = new Process();
-            process.StartInfo.FileName = tool7zaPath;
-            process.StartInfo.Arguments = string.Format("a {0}.zip ActRes/*", archive);
-            process.Start();
-            process.WaitForExit();
         }
         #endregion
     }
