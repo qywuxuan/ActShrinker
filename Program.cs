@@ -9,6 +9,7 @@ namespace ActShrinker
     class Program
     {
         const string DIR_LOBBY_LOGIN = @"\lobby\login";
+        static readonly string[] EXTENSION = new string[] { "png", "jpg" };
 
         static void Main(string[] args)
         {
@@ -73,11 +74,9 @@ namespace ActShrinker
 
             var imgs = targetFiles.FindAll(file =>
             {
-                var extension = new string[] { "png", "jpg" };
-
-                for (int i = 0; i < extension.Length; i++)
+                for (int i = 0; i < EXTENSION.Length; i++)
                 {
-                    if (file.EndsWith(extension[i], StringComparison.OrdinalIgnoreCase))
+                    if (file.EndsWith(EXTENSION[i], StringComparison.OrdinalIgnoreCase))
                     {
                         return true;
                     }
