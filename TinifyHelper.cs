@@ -47,7 +47,7 @@ namespace ActShrinker
                 var targetImg = targetImgs[index];
                 var targetImgCopy = targetImg.Replace(DirHelper.ORIGIN_ROOT_NAME, DirHelper.OUTPUT_ROOT_NAME);
 
-                tinyImg(targetImgCopy);
+                tinyImg(targetImgCopy, () => HashCacher.Instance.Add(targetImg));
             }
 
             while (true)
@@ -64,7 +64,7 @@ namespace ActShrinker
             Done = true;
         }
 
-        async void tinyImg(string path)
+        async void tinyImg(string path, Action sucCallback = null)
         {
             var source = Tinify.FromFile(path);
             var suc = true;
@@ -86,6 +86,8 @@ namespace ActShrinker
                 if (suc)
                 {
                     sucCount++;
+
+                    sucCallback?.Invoke();
                 }
             }
 

@@ -79,7 +79,9 @@
     <Compile Include="7zaHelper.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="DirHelper.cs" />
+    <Compile Include="HashHelper.cs" />
     <Compile Include="IOHelper.cs" />
+    <Compile Include="HashCacher.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TinifyHelper.cs" />

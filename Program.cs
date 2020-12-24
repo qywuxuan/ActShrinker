@@ -71,6 +71,20 @@ namespace ActShrinker
             #endregion
 
             #region Select
+            var md5Cacher = HashCacher.Instance;
+
+            targetFiles = targetFiles.FindAll(file =>
+            {
+                if (md5Cacher.IsDone(file))
+                {
+                    Console.WriteLine(string.Format("已归档的文件：{0}，本次构建该文件将被忽略", file));
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            });
 
             var imgs = targetFiles.FindAll(file =>
             {
@@ -147,6 +161,8 @@ namespace ActShrinker
             #endregion
 
             #region Archive
+            HashCacher.Instance.Archive();
+
             _7zaHelper.Archive();
             #endregion
         }
