@@ -45,13 +45,14 @@ namespace ActShrinker
                 }
             }
 
-            if (targetFiles != null)
+            if (targetFiles != null && targetFiles.Count > 0)
             {
                 //do nothing
             }
             else
             {
-                return;//参数异常
+                Console.WriteLine("指定目录下没有需要编译的资源，编译结束");
+                return;
             }
 
             targetFiles.RemoveAll(file => file.Contains("\\.svn\\"));
