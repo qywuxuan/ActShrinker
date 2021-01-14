@@ -32,7 +32,14 @@ namespace ActShrinker
 
         public static DirectoryInfo CreateDirectory(string directoryPath)
         {
-            return Directory.CreateDirectory(directoryPath);
+            if (!ExistsDirectory(directoryPath))
+            {
+                return Directory.CreateDirectory(directoryPath);
+            }
+            else
+            {
+                return new DirectoryInfo(directoryPath);
+            }
         }
 
         public static void DeleteDirectory(string directoryPath, bool recursive = true)

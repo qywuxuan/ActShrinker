@@ -72,12 +72,14 @@ namespace ActShrinker
 
             #region Select
             var md5Cacher = HashCacher.Instance;
+            var doneTargets = new List<string>();
 
             targetFiles = targetFiles.FindAll(file =>
             {
                 if (md5Cacher.IsDone(file))
                 {
                     Console.WriteLine(string.Format("已归档的文件：{0}，本次构建该文件将被忽略", file));
+                    doneTargets.Add(file.Replace(DirHelper.inputDir, DirHelper.outputDir));
                     return false;
                 }
                 else
@@ -106,16 +108,22 @@ namespace ActShrinker
             {
                 Console.WriteLine(string.Format("文件拷贝开始，共 {0} 份文件", targetFiles.Count));
 
+                //清理所有未归档的文件
                 for (int i = 0; i < selectedDirectories.Count; i++)
                 {
                     var selectedDirectory = selectedDirectories[i];
-                    IOHelper.DeleteDirectory(selectedDirectory);
-                }
 
-                for (int i = 0; i < selectedDirectories.Count; i++)
-                {
-                    var selectedDirectory = selectedDirectories[i];
                     IOHelper.CreateDirectory(selectedDirectory);
+
+                    var files = IOHelper.GetAllFiles(selectedDirectory, SearchOption.AllDirectories);
+
+                    foreach (var file in files)
+                    {
+                        if (!doneTargets.Contains(file))
+                        {
+                            IOHelper.DeleteFile(file);
+                        }
+                    }
                 }
 
                 for (int i = 0; i < targetFiles.Count; i++)
