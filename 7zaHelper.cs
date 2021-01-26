@@ -41,7 +41,7 @@ namespace ActShrinker
 
             var process = new Process();
             process.StartInfo.FileName = tool7zaPath;
-            process.StartInfo.Arguments = string.Format("a {0}.zip ActRes/*", archive);
+            process.StartInfo.Arguments = string.Format("a {0}.zip ./ActRes/*", archive);
             process.Start();
             process.WaitForExit();
         }
